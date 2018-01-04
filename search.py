@@ -2,7 +2,7 @@ import requests
 import time
 start = time.time()
 
-keys = 2
+keys = 3
 
 with open('API_KEYS.csv','r') as f:
     for i, line in enumerate(f):
@@ -14,7 +14,10 @@ with open('ENGINE_IDS.csv','r') as g:
         if i == keys-1:
             engine_id = line.split(',')[1]
 
-test = {'a1': u'Bull terrier', 'a3': u'Basset Hound', 'a2': u'Beagle', 'question': u'Which of these dogs is NOT an English breed? '}
+print api_key
+print engine_id
+
+test = {'keywords': u'What U.S. town music venue allows Americans watch live, in-person concerts Canada? ', 'a1': u'Derby Line, VT', 'a3': u'Niagara Falls, NY', 'a2': u'Portal, ND', 'question': u'What U.S. town has a music venue which allows Americans to watch live, in-person concerts from Canada? '}
 
 def normalize(lst):
     min_lst = min(lst)
@@ -24,11 +27,8 @@ def normalize(lst):
         return [1]*len(lst)
     out = []
     for i in lst:
-        print "!!!"
         out.append(float(i - min_lst)/float(diff))
     return out
-
-print normalize([6,10,0])
 
 def best_answer(lst, neg):
     if neg:
@@ -38,20 +38,21 @@ def best_answer(lst, neg):
     return 'a'+str(idx+1)
 
 def count_hits(text):
-
     query = text['question']
     a1 = text['a1'].upper()
     a2 = text['a2'].upper()
     a3 = text['a3'].upper()
+    query = "hello"
     url = ('https://www.googleapis.com/customsearch/v1?key='
         + api_key + '&cx=' + engine_id + '&q=' + query + '')
+    print url
     a1_ct = 0
     a2_ct = 0
     a3_ct = 0
     neg = 'NOT' in query
 
     r = requests.get(url)
-
+    print r.json()
     for hit in r.json()['items']:
         snippet = hit['snippet'].upper()
         a1_ct += snippet.count(a1)
@@ -88,3 +89,5 @@ def count_hits(text):
     print [a1_tot,a2_tot,a3_tot]
 
     return text[best_answer([a1_tot,a2_tot,a3_tot],neg)]
+
+print count_hits(test)
