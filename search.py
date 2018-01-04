@@ -7,12 +7,12 @@ keys = 3
 with open('API_KEYS.csv','r') as f:
     for i, line in enumerate(f):
         if i == keys-1:
-            api_key = line.split(',')[1]
+            api_key = line.split(',')[1][:-2]
 
 with open('ENGINE_IDS.csv','r') as g:
     for i, line in enumerate(g):
         if i == keys-1:
-            engine_id = line.split(',')[1]
+            engine_id = line.split(',')[1][:-2]
 
 test = {'keywords': u'What U.S. town music venue allows Americans watch live, in-person concerts Canada? ', 'a1': u'Derby Line, VT', 'a3': u'Niagara Falls, NY', 'a2': u'Portal, ND', 'question': u'What U.S. town has a music venue which allows Americans to watch live, in-person concerts from Canada? '}
 
@@ -35,6 +35,7 @@ def best_answer(lst, neg):
 
 def count_hits(text):
     query = text['question']
+    #keywords = text['keywords']
     a1 = text['a1'].upper()
     a2 = text['a2'].upper()
     a3 = text['a3'].upper()
