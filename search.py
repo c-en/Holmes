@@ -29,7 +29,6 @@ def normalize(lst):
     for i in lst:
         out.append(float(i - min_lst)/float(diff))
     return out
-
 def best_answer(lst, neg):
     if neg:
         idx = lst.index(min(lst))
@@ -60,6 +59,7 @@ def count_hits(text):
         a3_ct += snippet.count(a3)
 
     cts = [a1_ct,a2_ct,a3_ct]
+    print(cts)
     max_cts = max(cts)
     cts.remove(max_cts)
     if not (max_cts - max(cts) <= 2):
@@ -78,6 +78,7 @@ def count_hits(text):
         a3_pg += page_upper.count(a3)
 
     cts_pgs = [a1_pg, a2_pg, a3_pg]
+    print(cts_pgs)
 
     a_cts = normalize([a1_ct,a2_ct,a3_ct])
     a_pgs = normalize([a1_pg,a2_pg,a3_pg])
@@ -85,8 +86,8 @@ def count_hits(text):
     a1_tot = a_pgs[0]
     a2_tot = a_pgs[1]
     a3_tot = a_pgs[2]
-    print [a1_pg,a2_pg,a3_pg]
-    print [a1_tot,a2_tot,a3_tot]
+    # print [a1_pg,a2_pg,a3_pg]
+    # print [a1_tot,a2_tot,a3_tot]
 
     return text[best_answer([a1_tot,a2_tot,a3_tot],neg)]
 

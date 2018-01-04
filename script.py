@@ -83,7 +83,7 @@ def singleTest(filename):
     myVision = VisionApi()
     text = myVision.detect_text([filename])[filename][0]["description"].split("\n")
     result = createDict(text)
-    #print(result)
+    print(result)
     print(count_hits(result))
 
 def multipleTests(start, end):
@@ -101,5 +101,6 @@ def multipleTests(start, end):
         answer = count_hits(final)
         print(answer)
 
-singleTest("question.png")
+#singleTest("questions/Q8.png")
+multipleTests(13, 24)
 
