@@ -14,9 +14,6 @@ with open('ENGINE_IDS.csv','r') as g:
         if i == keys-1:
             engine_id = line.split(',')[1]
 
-print api_key
-print engine_id
-
 test = {'keywords': u'What U.S. town music venue allows Americans watch live, in-person concerts Canada? ', 'a1': u'Derby Line, VT', 'a3': u'Niagara Falls, NY', 'a2': u'Portal, ND', 'question': u'What U.S. town has a music venue which allows Americans to watch live, in-person concerts from Canada? '}
 
 def normalize(lst):
