@@ -1,1 +1,1 @@
-# HQBot
+# a trivia bot
