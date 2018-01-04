@@ -39,12 +39,12 @@ def best_answer(lst, neg):
 def count_hits(text):
 
     query = text['question']
-    #keywords = text['keywords']
+    keywords = text['keywords']
     a1 = text['a1'].upper()
     a2 = text['a2'].upper()
     a3 = text['a3'].upper()
     url = ('https://www.googleapis.com/customsearch/v1?key='
-        + api_key + '&cx=' + engine_id + '&q=' + query + '')
+        + api_key + '&cx=' + engine_id + '&q=' + keywords + '')
     a1_ct = 0
     a2_ct = 0
     a3_ct = 0
