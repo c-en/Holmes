@@ -2,7 +2,7 @@ import requests
 import time
 start = time.time()
 
-keys = 1
+keys = 2
 
 with open('API_KEYS.csv','r') as f:
     for i, line in enumerate(f):
@@ -56,6 +56,7 @@ def count_hits(text):
         a3_ct += snippet.count(a3)
 
     cts = [a1_ct,a2_ct,a3_ct]
+    print(cts)
     max_cts = max(cts)
     cts.remove(max_cts)
     if not (max_cts - max(cts) <= 2):
@@ -74,6 +75,7 @@ def count_hits(text):
         a3_pg += page_upper.count(a3)
 
     cts_pgs = [a1_pg, a2_pg, a3_pg]
+    print(cts_pgs)
 
     a_cts = normalize([a1_ct,a2_ct,a3_ct])
     a_pgs = normalize([a1_pg,a2_pg,a3_pg])
