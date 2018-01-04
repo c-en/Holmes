@@ -2,10 +2,19 @@ import requests
 import time
 start = time.time()
 
-api_key = ""
-engine_id = ""
+keys = 1
 
-test = {'a1': u'Hippo Fitting', 'a3': u'High Fidelity', 'a2': u'Hilarious Fiction', 'question': u"The audio equipment term 'hi- fi is short for what? "}
+with open('API_KEYS.csv','r') as f:
+    for i, line in enumerate(f):
+        if i == keys-1:
+            api_key = line.split(',')[1]
+
+with open('ENGINE_IDS.csv','r') as g:
+    for i, line in enumerate(g):
+        if i == keys-1:
+            engine_id = line.split(',')[1]
+
+test = {'a1': u'Hippo Fitting', 'a3': u'High Fidelity', 'a2': u'Hilarious Fiction', 'question': u"The audio equipment term 'hi- fi is NOT short for what? "}
 
 def normalize(lst):
     min_lst = min(lst)
@@ -18,6 +27,13 @@ def normalize(lst):
         out.append((i - min_lst)/diff)
     return out
 
+def best_answer(lst, neg):
+    if neg:
+        idx = lst.index(min(lst))
+    else:
+        idx = lst.index(max(lst))
+    return 'a'+str(idx+1)
+
 def count_hits(text):
 
     query = text['question']
@@ -29,36 +45,26 @@ def count_hits(text):
     a1_ct = 0
     a2_ct = 0
     a3_ct = 0
-    #print time.time() - start
+    neg = 'NOT' in query
+
     r = requests.get(url)
-    #print time.time() - start
+
     for hit in r.json()['items']:
         snippet = hit['snippet'].upper()
         a1_ct += snippet.count(a1)
         a2_ct += snippet.count(a2)
         a3_ct += snippet.count(a3)
-    # print time.time() - start
-
-    # print "A1 COUNT: " + str(a1_ct)
-    # print "A2 COUNT: " + str(a2_ct)
-    # print "A3 COUNT: " + str(a3_ct)
 
     cts = [a1_ct,a2_ct,a3_ct]
-    print(cts)
     max_cts = max(cts)
     cts.remove(max_cts)
     if not (max_cts - max(cts) <= 2):
-        if a1_ct == max_cts:
-            return text['a1']
-        elif a2_ct == max_cts:
-            return text['a2']
-        else:
-            return text['a3']
+        return text[best_answer([a1_ct,a2_ct,a3_ct], neg)]
 
     a1_pg = 0
     a2_pg = 0
     a3_pg = 0
-    #print time.time() - start
+
     for i in range(5):
         url = r.json()['items'][i]['link']
         s = requests.get(url)
@@ -68,11 +74,6 @@ def count_hits(text):
         a3_pg += page_upper.count(a3)
 
     cts_pgs = [a1_pg, a2_pg, a3_pg]
-    print(cts_pgs)
-    # print time.time() - start
-    # print "A1 PAGE: " + str(a1_pg)
-    # print "A2 PAGE: " + str(a2_pg)
-    # print "A3 PAGE: " + str(a3_pg)
 
     a_cts = normalize([a1_ct,a2_ct,a3_ct])
     a_pgs = normalize([a1_pg,a2_pg,a3_pg])
@@ -80,14 +81,5 @@ def count_hits(text):
     a1_tot = a_pgs[0]
     a2_tot = a_pgs[1]
     a3_tot = a_pgs[2]
-    # print "A1 TOTAL: " + str(a1_tot)
-    # print "A2 TOTAL: " + str(a2_tot)
-    # print "A3 TOTAL: " + str(a3_tot)
 
-    max_tot = max(a1_tot,a2_tot,a3_tot)
-    if a1_tot == max_tot:
-        return text['a1']
-    elif a2_tot == max_tot:
-        return text['a2']
-    else:
-        return text['a3']
+    return text[best_answer([a1_tot,a2_tot,a3_tot],neg)]
