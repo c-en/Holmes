@@ -2,7 +2,7 @@ import requests
 import time
 start = time.time()
 
-keys = 3
+keys = 5
 
 with open('API_KEYS.csv','r') as f:
     for i, line in enumerate(f):
@@ -35,25 +35,23 @@ def best_answer(lst, neg):
 
 def count_hits(text):
     query = text['question']
+    keywords = text['keywords']
     a1 = text['a1'].upper()
     a2 = text['a2'].upper()
     a3 = text['a3'].upper()
-    query = "hello"
     url = ('https://www.googleapis.com/customsearch/v1?key='
-        + api_key + '&cx=' + engine_id + '&q=' + query + '')
-    print url
+        + api_key + '&cx=' + engine_id + '&q=' + keywords + '')
     a1_ct = 0
     a2_ct = 0
     a3_ct = 0
     neg = 'NOT' in query
 
     r = requests.get(url)
-    print r.json()
-    for hit in r.json()['items']:
+    for i, hit in enumerate(r.json()['items']):
         snippet = hit['snippet'].upper()
-        a1_ct += snippet.count(a1)
-        a2_ct += snippet.count(a2)
-        a3_ct += snippet.count(a3)
+        a1_ct += float(snippet.count(a1))*(1./float(i+1))
+        a2_ct += float(snippet.count(a2))*(1./float(i+1))
+        a3_ct += float(snippet.count(a3))*(1./float(i+1))
 
     cts = [a1_ct,a2_ct,a3_ct]
     print(cts)
@@ -70,9 +68,9 @@ def count_hits(text):
         url = r.json()['items'][i]['link']
         s = requests.get(url)
         page_upper = s.text.upper()
-        a1_pg += page_upper.count(a1)
-        a2_pg += page_upper.count(a2)
-        a3_pg += page_upper.count(a3)
+        a1_pg += float(page_upper.count(a1))*(1./float(i+1))
+        a2_pg += float(page_upper.count(a2))*(1./float(i+1))
+        a3_pg += float(page_upper.count(a3))*(1./float(i+1))
 
     cts_pgs = [a1_pg, a2_pg, a3_pg]
     print(cts_pgs)
@@ -83,9 +81,5 @@ def count_hits(text):
     a1_tot = a_pgs[0]
     a2_tot = a_pgs[1]
     a3_tot = a_pgs[2]
-    # print [a1_pg,a2_pg,a3_pg]
-    # print [a1_tot,a2_tot,a3_tot]
 
     return text[best_answer([a1_tot,a2_tot,a3_tot],neg)]
-
-print count_hits(test)
