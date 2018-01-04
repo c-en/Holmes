@@ -2,8 +2,17 @@ import requests
 import time
 start = time.time()
 
-api_key = ""
-engine_id = ""
+keys = 1
+
+with open('API_KEYS.csv','r') as f:
+    for i, line in enumerate(f):
+        if i == keys-1:
+            api_key = line.split(',')[1]
+
+with open('ENGINE_IDS.csv','r') as g:
+    for i, line in enumerate(g):
+        if i == keys-1:
+            engine_id = line.split(',')[1]
 
 test = {'a1': u'Hippo Fitting', 'a3': u'High Fidelity', 'a2': u'Hilarious Fiction', 'question': u"The audio equipment term 'hi- fi is NOT short for what? "}
 
@@ -74,5 +83,3 @@ def count_hits(text):
     a3_tot = a_pgs[2]
 
     return text[best_answer([a1_tot,a2_tot,a3_tot],neg)]
-
-print count_hits(test)
