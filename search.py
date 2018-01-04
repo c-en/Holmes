@@ -2,17 +2,17 @@ import requests
 import time
 start = time.time()
 
-keys = 2
+keys = 3
 
 with open('API_KEYS.csv','r') as f:
     for i, line in enumerate(f):
         if i == keys-1:
-            api_key = line.split(',')[1]
+            api_key = line.split(',')[1][:-2]
 
 with open('ENGINE_IDS.csv','r') as g:
     for i, line in enumerate(g):
         if i == keys-1:
-            engine_id = line.split(',')[1]
+            engine_id = line.split(',')[1][:-2]
 
 test = {'a1': u'Bull terrier', 'a3': u'Basset Hound', 'a2': u'Beagle', 'question': u'Which of these dogs is NOT an English breed? '}
 
@@ -39,6 +39,7 @@ def best_answer(lst, neg):
 def count_hits(text):
 
     query = text['question']
+    #keywords = text['keywords']
     a1 = text['a1'].upper()
     a2 = text['a2'].upper()
     a3 = text['a3'].upper()

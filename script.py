@@ -1,6 +1,8 @@
 import base64
 import time
 start = time.time()
+#from nltk.corpus import stopwords
+#print(time.time() - start)
 
 from search import count_hits
 from googleapiclient import discovery
@@ -74,6 +76,8 @@ def createDict(text):
     result["question"] = result["question"].replace("'", " ")
     result["question"] = result["question"].replace('"', " ")
 
+    #result["keywords"] = ' '.join([word for word in result['question'].split(" ") if word not in stopwords.words('english')])
+
     result["a1"] = text[-4]
     result["a2"] = text[-3]
     result["a3"] = text[-2]
@@ -101,6 +105,6 @@ def multipleTests(start, end):
         answer = count_hits(final)
         print(answer)
 
-#singleTest("questions/Q8.png")
-multipleTests(13, 24)
+singleTest("question.png")
+# multipleTests(1, 12)
 
