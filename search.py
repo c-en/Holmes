@@ -14,7 +14,7 @@ with open('ENGINE_IDS.csv','r') as g:
         if i == keys-1:
             engine_id = line.split(',')[1]
 
-test = {'a1': u'Hippo Fitting', 'a3': u'High Fidelity', 'a2': u'Hilarious Fiction', 'question': u"The audio equipment term 'hi- fi is NOT short for what? "}
+test = {'a1': u'Bull terrier', 'a3': u'Basset Hound', 'a2': u'Beagle', 'question': u'Which of these dogs is NOT an English breed? '}
 
 def normalize(lst):
     min_lst = min(lst)
@@ -24,8 +24,10 @@ def normalize(lst):
         return [1]*len(lst)
     out = []
     for i in lst:
-        out.append((i - min_lst)/diff)
+        out.append(float(i - min_lst)/float(diff))
     return out
+
+#print normalize([6,10,0])
 
 def best_answer(lst, neg):
     if neg:
@@ -83,5 +85,7 @@ def count_hits(text):
     a1_tot = a_pgs[0]
     a2_tot = a_pgs[1]
     a3_tot = a_pgs[2]
+    # print [a1_pg,a2_pg,a3_pg]
+    # print [a1_tot,a2_tot,a3_tot]
 
     return text[best_answer([a1_tot,a2_tot,a3_tot],neg)]
