@@ -2,7 +2,7 @@ import requests
 import time
 start = time.time()
 
-keys = 5
+keys = 6
 
 with open('API_KEYS.csv','r') as f:
     for i, line in enumerate(f):
@@ -36,6 +36,7 @@ def best_answer(lst, neg):
 def count_hits(text):
     query = text['question']
     keywords = text['keywords']
+    print keywords
     a1 = text['a1'].upper()
     a2 = text['a2'].upper()
     a3 = text['a3'].upper()
@@ -57,7 +58,7 @@ def count_hits(text):
     print(cts)
     max_cts = max(cts)
     cts.remove(max_cts)
-    if not (max_cts - max(cts) <= 2):
+    if not (max_cts - max(cts) <= 1.5):
         return text[best_answer([a1_ct,a2_ct,a3_ct], neg)]
 
     a1_pg = 0
@@ -65,12 +66,15 @@ def count_hits(text):
     a3_pg = 0
 
     for i in range(5):
-        url = r.json()['items'][i]['link']
-        s = requests.get(url)
-        page_upper = s.text.upper()
-        a1_pg += float(page_upper.count(a1))*(1./float(i+1))
-        a2_pg += float(page_upper.count(a2))*(1./float(i+1))
-        a3_pg += float(page_upper.count(a3))*(1./float(i+1))
+        try:
+            url = r.json()['items'][i]['link']
+            s = requests.get(url)
+            page_upper = s.text.upper()
+            a1_pg += float(page_upper.count(a1))*(1./float(i+1))
+            a2_pg += float(page_upper.count(a2))*(1./float(i+1))
+            a3_pg += float(page_upper.count(a3))*(1./float(i+1))
+        except:
+            print "Error: "+url
 
     cts_pgs = [a1_pg, a2_pg, a3_pg]
     print(cts_pgs)
@@ -78,8 +82,6 @@ def count_hits(text):
     a_cts = normalize([a1_ct,a2_ct,a3_ct])
     a_pgs = normalize([a1_pg,a2_pg,a3_pg])
 
-    a1_tot = a_pgs[0]
-    a2_tot = a_pgs[1]
-    a3_tot = a_pgs[2]
+    a_tots = [0.33*ct+0.67*pg for ct,pg in zip(a_cts,a_pgs)]
 
-    return text[best_answer([a1_tot,a2_tot,a3_tot],neg)]
+    return text[best_answer(a_tots,neg)]
