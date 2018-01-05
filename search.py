@@ -14,7 +14,6 @@ with open('ENGINE_IDS.csv','r') as g:
         if i == keys-1:
             engine_id = line.split(',')[1][:-2]
 
-test = {'keywords': u'What U.S. town music venue allows Americans watch live, in-person concerts Canada? ', 'a1': u'Derby Line', 'a3': u'Niagara Falls', 'a2': u'Portal', 'question': u'What U.S. town has a music venue which allows Americans to watch live, in-person concerts from Canada? '}
 
 def normalize(lst):
     min_lst = min(lst)
@@ -26,6 +25,7 @@ def normalize(lst):
     for i in lst:
         out.append(float(i - min_lst)/float(diff))
     return out
+
 def best_answer(lst, neg):
     if neg:
         idx = lst.index(min(lst))
@@ -33,38 +33,55 @@ def best_answer(lst, neg):
         idx = lst.index(max(lst))
     return 'a'+str(idx+1)
 
+
 def count_hits(text):
-    query = text['question']
-    keywords = text['keywords']
-    print keywords
+    
     a1 = text['a1'].upper()
     a2 = text['a2'].upper()
     a3 = text['a3'].upper()
-    url = ('https://www.googleapis.com/customsearch/v1?key='
-        + api_key + '&cx=' + engine_id + '&q=' + keywords + '')
-    a1_ct = 0
-    a2_ct = 0
-    a3_ct = 0
-    neg = 'NOT' in query
 
+    url = ('https://www.googleapis.com/customsearch/v1?key='
+        + api_key + '&cx=' + engine_id + '&q=')
+
+    # hits in snippets
+    a1_sn = 0
+    a2_sn = 0
+    a3_sn = 0
+
+    # checking for question type
+    neg = 'NOT' in query
+    if not ('"' in query):
+        neg = neg or ('never' in query)
+        url += text['keywords']
+    else:
+        url += text['question']
+
+    # count hits in snippets, weighted by 1/(result num)
     r = requests.get(url)
     for i, hit in enumerate(r.json()['items']):
         snippet = hit['snippet'].upper()
-        a1_ct += float(snippet.count(a1))*(1./float(i+1))
-        a2_ct += float(snippet.count(a2))*(1./float(i+1))
-        a3_ct += float(snippet.count(a3))*(1./float(i+1))
+        a1_sn += float(snippet.count(a1))*(1./float(i+1))
+        a2_sn += float(snippet.count(a2))*(1./float(i+1))
+        a3_sn += float(snippet.count(a3))*(1./float(i+1))
 
-    cts = [a1_ct,a2_ct,a3_ct]
-    print(cts)
-    max_cts = max(cts)
-    cts.remove(max_cts)
-    if not (max_cts - max(cts) <= 1.5):
-        return text[best_answer([a1_ct,a2_ct,a3_ct], neg)]
+    # check if snippets are different enough to stop,
+    # or if too close to call
+    sns = [a1_sn,a2_sn,a3_sn]
+    if neg:
+        func = min
+    else:
+        func = max
+    best_sns = func(sns)
+    sns.remove(best_sns)
+    if not (abs(best_sns - func(sns)) <= 1.5):
+        return text[best_answer([a1_sn,a2_sn,a3_sn], neg)]
 
+    # hits in pages
     a1_pg = 0
     a2_pg = 0
     a3_pg = 0
 
+    # count hits in pages, weighted by 1/(result num)
     for i in range(5):
         try:
             url = r.json()['items'][i]['link']
@@ -76,12 +93,13 @@ def count_hits(text):
         except:
             print "Error: "+url
 
-    cts_pgs = [a1_pg, a2_pg, a3_pg]
-    print(cts_pgs)
-
-    a_cts = normalize([a1_ct,a2_ct,a3_ct])
+    # combined hit score, with snippets 1/3 weight and pages 2/3 weight
+    # aka words appearing in snippets counted 50% more
+    a_sns = normalize([a1_sn,a2_sn,a3_sn])
     a_pgs = normalize([a1_pg,a2_pg,a3_pg])
-
-    a_tots = [0.33*ct+0.67*pg for ct,pg in zip(a_cts,a_pgs)]
+    a_tots = [sn+2.*pg for sn,pg in zip(a_sns,a_pgs)]
 
     return text[best_answer(a_tots,neg)]
+
+
+test = {'keywords': u'What U.S. town music venue allows Americans watch live, in-person concerts Canada? ', 'a1': u'Derby Line', 'a3': u'Niagara Falls', 'a2': u'Portal', 'question': u'What U.S. town has a music venue which allows Americans to watch live, in-person concerts from Canada? '}
