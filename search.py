@@ -36,7 +36,7 @@ def best_answer(lst, neg):
 def count_hits(text):
     query = text['question']
     keywords = text['keywords']
-    print keywords
+    
     a1 = text['a1'].upper()
     a2 = text['a2'].upper()
     a3 = text['a3'].upper()
