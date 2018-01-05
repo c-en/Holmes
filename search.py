@@ -2,7 +2,7 @@ import requests
 import time
 start = time.time()
 
-keys = 5
+keys = 6
 
 with open('API_KEYS.csv','r') as f:
     for i, line in enumerate(f):
@@ -44,7 +44,7 @@ def count_hits(text):
     a1_ct = 0
     a2_ct = 0
     a3_ct = 0
-    neg = 'NOT' in query
+    neg = 'NOT' in query or 'never' in query
 
     r = requests.get(url)
     for i, hit in enumerate(r.json()['items']):
