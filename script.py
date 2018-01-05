@@ -75,8 +75,8 @@ def createDict(text):
     result["question"] = ""
     for i in range(len(text) - 4):
         result["question"] += text[i] + " "
-    result["question"] = result["question"].replace("'", " ")
-    result["question"] = result["question"].replace('"', " ")
+    result["question"] = result["question"].replace("'", "\'")
+    result["question"] = result["question"].replace('"', '\"')
     #result["question"] = result["question"].replace('-', " ")
 
     result["keywords"] = ' '.join([word for word in result['question'].split(" ") if word not in stopwords])
@@ -99,7 +99,6 @@ def multipleTests(start, end):
         texts.append("questions/Q" + str(i) + ".png")
     myVision = VisionApi()
     result = myVision.detect_text(texts)
-    #print(result["questions/Q22.png"])
 
     for i in range(start, end + 1):
         text = result["questions/Q" + str(i) + ".png"][0]["description"].split("\n")
@@ -108,6 +107,6 @@ def multipleTests(start, end):
         answer = count_hits(final)
         print(answer)
 
-singleTest("question.png")
-#multipleTests(25, 36)
+#singleTest("question.png")
+multipleTests(22, 22)
 

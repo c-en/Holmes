@@ -2,7 +2,7 @@ import requests
 import time
 start = time.time()
 
-keys = 6
+keys = 7
 
 with open('API_KEYS.csv','r') as f:
     for i, line in enumerate(f):
@@ -13,7 +13,6 @@ with open('ENGINE_IDS.csv','r') as g:
     for i, line in enumerate(g):
         if i == keys-1:
             engine_id = line.split(',')[1][:-2]
-
 
 def normalize(lst):
     min_lst = min(lst)
@@ -36,7 +35,6 @@ def best_answer(lst, neg):
 
 def count_hits(text):
     query = text['question']
-
     
     a1 = text['a1'].upper()
     a2 = text['a2'].upper()
@@ -52,7 +50,7 @@ def count_hits(text):
 
     # checking for question type
     neg = 'NOT' in query
-    if not ('"' in query):
+    if not ('\"' in query):
         neg = neg or ('never' in query)
         url += text['keywords']
     else:
@@ -99,8 +97,6 @@ def count_hits(text):
     # aka words appearing in snippets counted 50% more
     a_sns = normalize([a1_sn,a2_sn,a3_sn])
     a_pgs = normalize([a1_pg,a2_pg,a3_pg])
-    a_tots = [sn+2.*pg for sn,pg in zip(a_sns,a_pgs)]
-
     return text[best_answer(a_tots,neg)]
 
 
