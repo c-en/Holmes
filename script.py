@@ -108,6 +108,6 @@ def multipleTests(start, end):
         answer = count_hits(final)
         print(answer)
 
-singleTest("questions/Q25.png")
-#multipleTests(25, 36)
+#singleTest("questions/Q24.png")
+multipleTests(25, 36)
 

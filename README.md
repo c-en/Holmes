@@ -1,1 +1,1 @@
-# a trivia bot
+HOLMES, a bot for all of your multiple choice mysteries.
