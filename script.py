@@ -77,6 +77,7 @@ def createDict(text):
         result["question"] += text[i] + " "
     result["question"] = result["question"].replace("'", " ")
     result["question"] = result["question"].replace('"', " ")
+    #result["question"] = result["question"].replace('-', " ")
 
     result["keywords"] = ' '.join([word for word in result['question'].split(" ") if word not in stopwords])
 
@@ -103,10 +104,10 @@ def multipleTests(start, end):
     for i in range(start, end + 1):
         text = result["questions/Q" + str(i) + ".png"][0]["description"].split("\n")
         final = createDict(text)
-        # print(final)
+        print(final)
         answer = count_hits(final)
         print(answer)
 
-#singleTest("questions/Q24.png")
-multipleTests(25, 36)
+singleTest("question.png")
+#multipleTests(25, 36)
 

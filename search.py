@@ -35,6 +35,8 @@ def best_answer(lst, neg):
 
 
 def count_hits(text):
+    query = text['question']
+
     
     a1 = text['a1'].upper()
     a2 = text['a2'].upper()
@@ -54,7 +56,7 @@ def count_hits(text):
         neg = neg or ('never' in query)
         url += text['keywords']
     else:
-        url += text['question']
+        url += query
 
     # count hits in snippets, weighted by 1/(result num)
     r = requests.get(url)
