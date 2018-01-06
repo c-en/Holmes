@@ -80,6 +80,7 @@ def createDict(text):
     #result["question"] = result["question"].replace('-', " ")
 
     result["keywords"] = ' '.join([word for word in result['question'].split(" ") if word not in stopwords])
+    #result["keywords"] = result["question"]
 
     result["a1"] = text[-4]
     result["a2"] = text[-3]
@@ -108,6 +109,6 @@ def multipleTests(setNum, start, end):
         answer = count_hits(final)
         print(answer)
 
-#singleTest("question.png")
-multipleTests(3, 1, 12)
+singleTest("question.png")
+#multipleTests(3, 1, 12)
 
