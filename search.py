@@ -75,9 +75,11 @@ def count_hits(text):
         neg = neg or ('never' in query)
         keywords = text['keywords'].replace('never', '').replace('NOT', '')
         url += keywords
-        print "negative!"
     else:
         url += query
+
+    if neg:
+        print "negative!"
 
     # count hits in snippets, weighted by 1/(result num)
     r = requests.get(url)
@@ -116,7 +118,7 @@ def count_hits(text):
             a2_pg += float(page_upper.count(a2))*(1./float(i+1))
             a3_pg += float(page_upper.count(a3))*(1./float(i+1))
         except:
-            print "Error: "+url
+            pass
 
     # combined hit score, with snippets 1/3 weight and pages 2/3 weight
     # aka words appearing in snippets counted 50% more
@@ -125,13 +127,13 @@ def count_hits(text):
     a_tots = [sn+2.*pg for sn,pg in zip(a_sns,a_pgs)]
     return text[best_answer(a_tots,neg)]
 
-def find_date(text):
-    query1 = text['keywords'] + ' ' + text['a1']
-    query2 = text['keywords'] + ' ' + text['a2']
-    query3 = text['keywords'] + ' ' + text['a3']
-    def count_dates(query):
-        url = url = ('https://www.googleapis.com/customsearch/v1?key='
-        + api_key + '&cx=' + engine_id + '&q='+query+'')
+# def find_date(text):
+#     query1 = text['keywords'] + ' ' + text['a1']
+#     query2 = text['keywords'] + ' ' + text['a2']
+#     query3 = text['keywords'] + ' ' + text['a3']
+#     def count_dates(query):
+#         url = url = ('https://www.googleapis.com/customsearch/v1?key='
+#         + api_key + '&cx=' + engine_id + '&q='+query+'')
 
 
 test = {'keywords': u'What U.S. town music venue allows Americans watch live, in-person concerts Canada? ', 'a1': u'Derby Line', 'a3': u'Niagara Falls', 'a2': u'Portal', 'question': u'What U.S. town has a music venue which allows Americans to watch live, in-person concerts from Canada? '}

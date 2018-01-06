@@ -104,7 +104,6 @@ def multipleTests(setNum, start, end):
     for i in range(start, end + 1):
         text = result["questions/Set-" + str(setNum) + "/Q" + str(i) + ".png"][0]["description"].split("\n")
         final = createDict(text)
-        print(final)
         answer = count_hits(final)
         print(answer)
 
