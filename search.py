@@ -1,18 +1,24 @@
 import requests
+import signal
 import time
-start = time.time()
 
-keys = 7
+class Timeout(Exception):
+    pass
+
+def handler(sig, frame):
+    raise Timeout
+
+keys = 8
 
 with open('API_KEYS.csv','r') as f:
     for i, line in enumerate(f):
         if i == keys-1:
-            api_key = line.split(',')[1][:-2]
+            api_key = line.split(',')[1].rstrip()
 
 with open('ENGINE_IDS.csv','r') as g:
     for i, line in enumerate(g):
         if i == keys-1:
-            engine_id = line.split(',')[1][:-2]
+            engine_id = line.split(',')[1].rstrip()
 
 def normalize(lst):
     min_lst = min(lst)
@@ -32,6 +38,17 @@ def best_answer(lst, neg):
         idx = lst.index(max(lst))
     return 'a'+str(idx+1)
 
+# doesn't work yet
+def crawl_url(url):
+    signal.signal(signal.SIGALRM, handler)  # register interest in SIGALRM events
+
+    signal.alarm(2)  # timeout in 2 seconds
+    try:
+        r = requests.get(url)
+        return r
+
+    except Timeout:
+        print('took too long', url)
 
 def count_hits(text):
     query = text['question']
@@ -67,6 +84,7 @@ def count_hits(text):
     # check if snippets are different enough to stop,
     # or if too close to call
     sns = [a1_sn,a2_sn,a3_sn]
+    print(sns)
     if neg:
         func = min
     else:
@@ -97,6 +115,9 @@ def count_hits(text):
     # aka words appearing in snippets counted 50% more
     a_sns = normalize([a1_sn,a2_sn,a3_sn])
     a_pgs = normalize([a1_pg,a2_pg,a3_pg])
+    
+    print(a_pgs)
+    a_tots = [sn+2.*pg for sn,pg in zip(a_sns,a_pgs)]
     return text[best_answer(a_tots,neg)]
 
 
