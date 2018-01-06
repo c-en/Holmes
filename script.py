@@ -14,7 +14,7 @@ from oauth2client.client import GoogleCredentials
 DISCOVERY_URL = 'https://{api}.googleapis.com/$discovery/rest?version={apiVersion}'  # noqa
 BATCH_SIZE = 10
 
-
+# Google's OCR
 class VisionApi:
     """Construct and use the Google Vision API service."""
 
@@ -89,24 +89,25 @@ def createDict(text):
 def singleTest(filename):
     myVision = VisionApi()
     text = myVision.detect_text([filename])[filename][0]["description"].split("\n")
+    #print("Text", text)
     result = createDict(text)
     print(result)
     print(count_hits(result))
 
-def multipleTests(start, end):
+def multipleTests(setNum, start, end):
     texts = []
     for i in range(start, end + 1):
-        texts.append("questions/Q" + str(i) + ".png")
+        texts.append("questions/Set-" + str(setNum) + "/Q" + str(i) + ".png")
     myVision = VisionApi()
     result = myVision.detect_text(texts)
 
     for i in range(start, end + 1):
-        text = result["questions/Q" + str(i) + ".png"][0]["description"].split("\n")
+        text = result["questions/Set-" + str(setNum) + "/Q" + str(i) + ".png"][0]["description"].split("\n")
         final = createDict(text)
         print(final)
         answer = count_hits(final)
         print(answer)
 
 #singleTest("question.png")
-multipleTests(41, 41)
+multipleTests(3, 1, 12)
 
