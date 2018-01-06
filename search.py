@@ -1,8 +1,9 @@
 import requests
 import time
+import datefinder
 start = time.time()
 
-keys = 7
+keys = 1
 
 with open('API_KEYS.csv','r') as f:
     for i, line in enumerate(f):
@@ -52,7 +53,9 @@ def count_hits(text):
     neg = 'NOT' in query
     if not ('\"' in query):
         neg = neg or ('never' in query)
-        url += text['keywords']
+        keywords = text['keywords'].replace('never', '').replace('NOT', '')
+        url += keywords
+        print "negative!"
     else:
         url += query
 
@@ -73,6 +76,7 @@ def count_hits(text):
         func = max
     best_sns = func(sns)
     sns.remove(best_sns)
+    print [a1_sn,a2_sn,a3_sn]
     if not (abs(best_sns - func(sns)) <= 1.5):
         return text[best_answer([a1_sn,a2_sn,a3_sn], neg)]
 
@@ -97,7 +101,17 @@ def count_hits(text):
     # aka words appearing in snippets counted 50% more
     a_sns = normalize([a1_sn,a2_sn,a3_sn])
     a_pgs = normalize([a1_pg,a2_pg,a3_pg])
+    a_tots = [sn+2.*pg for sn,pg in zip(a_sns,a_pgs)]
+    print a_tots
     return text[best_answer(a_tots,neg)]
+
+def find_date(text):
+    query1 = text['keywords'] + ' ' + text['a1']
+    query2 = text['keywords'] + ' ' + text['a2']
+    query3 = text['keywords'] + ' ' + text['a3']
+    def count_dates(query):
+        url = url = ('https://www.googleapis.com/customsearch/v1?key='
+        + api_key + '&cx=' + engine_id + '&q='+query+'')
 
 
 test = {'keywords': u'What U.S. town music venue allows Americans watch live, in-person concerts Canada? ', 'a1': u'Derby Line', 'a3': u'Niagara Falls', 'a2': u'Portal', 'question': u'What U.S. town has a music venue which allows Americans to watch live, in-person concerts from Canada? '}
