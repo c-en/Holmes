@@ -84,7 +84,7 @@ def count_hits(text):
     # count hits in snippets, weighted by 1/(result num)
     r = requests.get(url)
     for i, hit in enumerate(r.json()['items']):
-        snippet = hit['snippet'].upper()
+        snippet = hit['snippet'].upper() + ' ' + hit['title'].upper()
         a1_sn += float(snippet.count(a1))*(1./float(i+1))
         a2_sn += float(snippet.count(a2))*(1./float(i+1))
         a3_sn += float(snippet.count(a3))*(1./float(i+1))
@@ -135,5 +135,25 @@ def count_hits(text):
 #         url = url = ('https://www.googleapis.com/customsearch/v1?key='
 #         + api_key + '&cx=' + engine_id + '&q='+query+'')
 
+def total_results(text):
+    q1 = text['question'] + ' ' + text['a1']
+    q2 = text['question'] + ' ' + text['a2']
+    q3 = text['question'] + ' ' + text['a3']
+    url = ('https://www.googleapis.com/customsearch/v1?key='
+        + api_key + '&cx=' + engine_id + '&q=')
+    
+    r1 = requests.get(url + q1)
+    r2 = requests.get(url + q2)
+    r3 = requests.get(url + q3)
+
+    results1 = r1.json()['searchInformation']['totalResults']
+    results2 = r2.json()['searchInformation']['totalResults']
+    results3 = r3.json()['searchInformation']['totalResults']
+
+    print [results1,results2,results3]
+    return [results1,results2,results3]
+    
 
 test = {'keywords': u'What U.S. town music venue allows Americans watch live, in-person concerts Canada? ', 'a1': u'Derby Line', 'a3': u'Niagara Falls', 'a2': u'Portal', 'question': u'What U.S. town has a music venue which allows Americans to watch live, in-person concerts from Canada? '}
+
+total_results(test)
