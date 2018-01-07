@@ -2,11 +2,10 @@ import requests
 
 import signal
 import time
-import datefinder
 from bs4 import BeautifulSoup
-start = time.time()
 
-
+import eventlet
+eventlet.monkey_patch()
 
 # class Timeout(Exception):
 #     pass
@@ -33,7 +32,7 @@ def deadline(timeout, *args):
   return decorate
 
 
-keys = 11
+keys = 10
 
 with open('API_KEYS.csv','r') as f:
     for i, line in enumerate(f):
@@ -81,17 +80,18 @@ def process(text):
     query = text['question']
     url = ('https://www.googleapis.com/customsearch/v1?key='
         + api_key + '&cx=' + engine_id + '&q=')
+
     # checking for question type
-    neg = 'NOT' in query
-    #if not ('\"' in query):
-    neg = neg or ('never' in query)
+    neg = ('NOT' in query) or ('never' in query)
     #    keywords = text['keywords'].replace('never', '').replace('NOT', '')
     #    url += keywords
     #else:
     #    url += query
 
+    start = time.time()
     # snippet_hits counts hits in the titles and snippets of the google search
     snippet_results = google_hits(text)
+    print("Snippet Time: " + str(time.time() - start))
 
     # check if snippets are too close to call
     if neg:
@@ -105,14 +105,14 @@ def process(text):
         print "NO PAGE HITS"
         pg_hits = [0,0,0]
     else:
+        start = time.time()
         pg_hits = google_pages(text,snippet_results['soup'])
+        print("Page Time: " + str(time.time() - start))
 
     # combined hit score, with snippets 1/3 weight and pages 2/3 weight
     # aka words appearing in snippets counted 50% more
     a_sns = normalize(snippet_results['sn_hits'])
     a_pgs = normalize(pg_hits)
-    print a_sns
-    print a_pgs
     a_tots = [sn+pg for sn,pg in zip(a_sns,a_pgs)]
     print "TOTAL SCORE: " + str(a_tots)
     print "NEGATIVE: " + str(neg)
@@ -152,9 +152,11 @@ def google_hits(text):
 
     url = 'https://www.google.com/search?q=' + query
 
+    start = time.time()
     r = requests.get(url)
+    print("Time search: " + str(time.time() - start))
     c = r.content
-    soup = BeautifulSoup(c)
+    soup = BeautifulSoup(c, "lxml")
 
     sn_hits = [0,0,0]
     # counts hits in snippets AND titles (class 'g' gets both)
@@ -179,12 +181,16 @@ def google_pages(text, soup):
     for i, link in enumerate(h3):
         try:
             url = str(link).split('&')[0].split('"')[-1].split('q=')[-1]
-            s = requests.get(url)
+            start = time.time()
+            with eventlet.Timeout(1):
+                s = requests.get(url)
+                page_upper = s.text.upper()
+                pg_hits[0] += float(page_upper.count(text['a1'].upper()))*(1./float(i+1))
+                pg_hits[1] += float(page_upper.count(text['a2'].upper()))*(1./float(i+1))
+                pg_hits[2] += float(page_upper.count(text['a3'].upper()))*(1./float(i+1))
+            
+            print("Time " + str(i) + ": " + str(time.time() - start))
             #s = crawl_url(url)
-            page_upper = s.text.upper()
-            pg_hits[0] += float(page_upper.count(text['a1'].upper()))*(1./float(i+1))
-            pg_hits[1] += float(page_upper.count(text['a2'].upper()))*(1./float(i+1))
-            pg_hits[2] += float(page_upper.count(text['a3'].upper()))*(1./float(i+1))
         except:
             pass
 
