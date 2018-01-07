@@ -177,7 +177,7 @@ def google_pages(text, soup):
     pg_hits = [0,0,0]
     h3 = soup.find_all('h3')
     for i, link in enumerate(h3):
-        if i > 5:
+        if i < 5:
             try:
                 url = str(link).split('&')[0].split('"')[-1].split('q=')[-1]
                 s = requests.get(url)
