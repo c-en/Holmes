@@ -177,16 +177,19 @@ def google_pages(text, soup):
     pg_hits = [0,0,0]
     h3 = soup.find_all('h3')
     for i, link in enumerate(h3):
-        try:
-            url = str(link).split('&')[0].split('"')[-1].split('q=')[-1]
-            s = requests.get(url)
-            #s = crawl_url(url)
-            page_upper = s.text.upper()
-            pg_hits[0] += float(page_upper.count(text['a1'].upper()))*(1./float(i+1))
-            pg_hits[1] += float(page_upper.count(text['a2'].upper()))*(1./float(i+1))
-            pg_hits[2] += float(page_upper.count(text['a3'].upper()))*(1./float(i+1))
-        except:
-            pass
+        if i > 5:
+            try:
+                url = str(link).split('&')[0].split('"')[-1].split('q=')[-1]
+                s = requests.get(url)
+                #s = crawl_url(url)
+                page_upper = s.text.upper()
+                pg_hits[0] += float(page_upper.count(text['a1'].upper()))*(1./float(i+1))
+                pg_hits[1] += float(page_upper.count(text['a2'].upper()))*(1./float(i+1))
+                pg_hits[2] += float(page_upper.count(text['a3'].upper()))*(1./float(i+1))
+            except:
+                pass
+        else:
+            break
 
     print "PAGE HITS: " + str(pg_hits)
     return pg_hits
