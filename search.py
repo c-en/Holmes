@@ -1,11 +1,9 @@
 import requests
+import grequests
 
 import signal
 import time
 from bs4 import BeautifulSoup
-
-import eventlet
-eventlet.monkey_patch()
 
 # class Timeout(Exception):
 #     pass
@@ -106,7 +104,7 @@ def process(text):
         pg_hits = [0,0,0]
     else:
         start = time.time()
-        pg_hits = google_pages(text,snippet_results['soup'])
+        pg_hits = google_pages_multithread(text,snippet_results['soup'])
         print("Page Time: " + str(time.time() - start))
 
     # combined hit score, with snippets 1/3 weight and pages 2/3 weight
@@ -179,20 +177,44 @@ def google_pages(text, soup):
     pg_hits = [0,0,0]
     h3 = soup.find_all('h3')
     for i, link in enumerate(h3):
+        
         try:
             url = str(link).split('&')[0].split('"')[-1].split('q=')[-1]
             start = time.time()
-            with eventlet.Timeout(1):
-                s = requests.get(url)
-                page_upper = s.text.upper()
-                pg_hits[0] += float(page_upper.count(text['a1'].upper()))*(1./float(i+1))
-                pg_hits[1] += float(page_upper.count(text['a2'].upper()))*(1./float(i+1))
-                pg_hits[2] += float(page_upper.count(text['a3'].upper()))*(1./float(i+1))
-            
+            s = requests.get(url, timeout=(0.5, 0.5))
+            page_upper = s.text.upper()
+            pg_hits[0] += float(page_upper.count(text['a1'].upper()))*(1./float(i+1))
+            pg_hits[1] += float(page_upper.count(text['a2'].upper()))*(1./float(i+1))
+            pg_hits[2] += float(page_upper.count(text['a3'].upper()))*(1./float(i+1))
+        
             print("Time " + str(i) + ": " + str(time.time() - start))
             #s = crawl_url(url)
         except:
             pass
+
+    print "PAGE HITS: " + str(pg_hits)
+    return pg_hits
+
+def exception(request, exception):
+    print "Problem: {}: {}".format(request.url, exception)
+
+def google_pages_multithread(text, soup):
+    pg_hits = [0,0,0]
+    h3 = soup.find_all('h3')
+    urls = []
+    for i, link in enumerate(h3):
+        urls.append(str(link).split('&')[0].split('"')[-1].split('q=')[-1])
+    
+    start = time.time()
+    results = grequests.map((grequests.get(u, timeout=(0.5, 0.5)) for u in urls), exception_handler=exception, size=len(urls))
+    print(urls)
+
+    for u in results:
+        if u != None:
+            page_upper = u.text.upper()
+            pg_hits[0] += float(page_upper.count(text['a1'].upper()))*(1./float(i+1))
+            pg_hits[1] += float(page_upper.count(text['a2'].upper()))*(1./float(i+1))
+            pg_hits[2] += float(page_upper.count(text['a3'].upper()))*(1./float(i+1))
 
     print "PAGE HITS: " + str(pg_hits)
     return pg_hits
