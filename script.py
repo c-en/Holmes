@@ -1,6 +1,6 @@
 import base64
 import time
-start = time.time()
+
 #from nltk.corpus import stopwords
 #print(time.time() - start)
 
@@ -88,8 +88,10 @@ def createDict(text):
     return result
 
 def singleTest(filename):
+    start = time.time()
     myVision = VisionApi()
     text = myVision.detect_text([filename])[filename][0]["description"].split("\n")
+    print("OCR Time: " + str(timt.time() - start))
     #print("Text", text)
     result = createDict(text)
     print(result)
@@ -109,5 +111,5 @@ def multipleTests(setNum, start, end):
         print(answer)
 
 #singleTest("question.png")
-multipleTests(2, 1, 12)
+multipleTests(3, 11, 11)
 
