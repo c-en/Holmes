@@ -85,16 +85,14 @@ def createDict(text):
     result["a1"] = text[-4]
     result["a2"] = text[-3]
     result["a3"] = text[-2]
+    print(result)
     return result
 
 def singleTest(filename):
     start = time.time()
     myVision = VisionApi()
     text = myVision.detect_text([filename])[filename][0]["description"].split("\n")
-    print("OCR Time: " + str(timt.time() - start))
-    #print("Text", text)
     result = createDict(text)
-    print(result)
     print(process(result))
 
 def multipleTests(setNum, start, end):
@@ -105,10 +103,14 @@ def multipleTests(setNum, start, end):
     result = myVision.detect_text(texts)
 
     for i in range(start, end + 1):
+        start = time.time()
         text = result["questions/Set-" + str(setNum) + "/Q" + str(i) + ".png"][0]["description"].split("\n")
         final = createDict(text)
         answer = process(final)
+        print("Total time for search: " + str(time.time() - start))
         print(answer)
+
+
 
 #singleTest("question.png")
 multipleTests(2, 1, 12)
