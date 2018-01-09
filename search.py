@@ -1,6 +1,6 @@
 import requests
 import grequests
-
+from nltk.corpus import wordnet
 import signal
 import time
 from bs4 import BeautifulSoup
@@ -74,7 +74,7 @@ def crawl_url(url):
 
 
 def process(text):
-    print "***********************************************"
+    print("***********************************************")
     query = text['question']
     url = ('https://www.googleapis.com/customsearch/v1?key='
         + api_key + '&cx=' + engine_id + '&q=')
@@ -100,7 +100,7 @@ def process(text):
     best_sns = func(sn_hits)
     sn_hits.remove(best_sns)
     if not (abs(best_sns - func(sn_hits)) <= 1.5):
-        print "NO PAGE HITS"
+        print("NO PAGE HITS")
         pg_hits = [0,0,0]
     else:
         start = time.time()
@@ -112,8 +112,8 @@ def process(text):
     a_sns = normalize(snippet_results['sn_hits'])
     a_pgs = normalize(pg_hits)
     a_tots = [sn+pg for sn,pg in zip(a_sns,a_pgs)]
-    print "TOTAL SCORE: " + str(a_tots)
-    print "NEGATIVE: " + str(neg)
+    print("TOTAL SCORE: " + str(a_tots))
+    print("NEGATIVE: " + str(neg))
     return text[best_answer(a_tots,neg)]
 
 
@@ -138,7 +138,7 @@ def snippet_hits(text):
         sn_hits[1] += float(snippet.count(a2))*(1./float(i+1))
         sn_hits[2] += float(snippet.count(a3))*(1./float(i+1))
 
-    print "SNIPPET HITS: " + str(sn_hits)
+    print("SNIPPET HITS: " + str(sn_hits))
     return {'sn_hits':sn_hits, 'results':r.json()['items']}
 
 def google_hits(text):
@@ -154,18 +154,29 @@ def google_hits(text):
     r = requests.get(url)
     print("Time search: " + str(time.time() - start))
     c = r.content
-    soup = BeautifulSoup(c, "lxml")
-
+    soup_start = time.time()
+    soup = BeautifulSoup(c,'lxml')
+    print("TIME SOUP: " +str(time.time()-soup_start))
     sn_hits = [0,0,0]
     # counts hits in snippets AND titles (class 'g' gets both)
+    snippet_start = time.time()
     for i, snippet in enumerate(soup.find_all(class_='g')):
         snip = snippet.text.upper()
         sn_hits[0] += float(snip.count(a1))*(1./float(i+1))
         sn_hits[1] += float(snip.count(a2))*(1./float(i+1))
         sn_hits[2] += float(snip.count(a3))*(1./float(i+1))
-
-    print "SNIPPET HITS: " + str(sn_hits)
+        print("SNIPPET " + str(i) + ': ' + str(time.time()-snippet_start))
+    print("SNIPPET CALCS: "+str(time.time()-snippet_start))
+    print("SNIPPET HITS: " + str(sn_hits))
     return {'sn_hits':sn_hits, 'soup':soup}
+    # tree = html.fromstring(c)
+    # snippets = tree.xpath('//*[@class="g"]')
+    # for item in snippets:
+    #     print item.get('href')
+    # titles = tree.xpath('//a')
+    # for item in titles:
+    #     print item.get('text')
+
 
 
     #for link in soup.find_all('a'):
@@ -181,22 +192,23 @@ def google_pages(text, soup):
         try:
             url = str(link).split('&')[0].split('"')[-1].split('q=')[-1]
             start = time.time()
+
             s = requests.get(url, timeout=(0.5, 0.5))
             page_upper = s.text.upper()
             pg_hits[0] += float(page_upper.count(text['a1'].upper()))*(1./float(i+1))
             pg_hits[1] += float(page_upper.count(text['a2'].upper()))*(1./float(i+1))
             pg_hits[2] += float(page_upper.count(text['a3'].upper()))*(1./float(i+1))
-        
+
             print("Time " + str(i) + ": " + str(time.time() - start))
             #s = crawl_url(url)
         except:
             pass
 
-    print "PAGE HITS: " + str(pg_hits)
+    print("PAGE HITS: " + str(pg_hits))
     return pg_hits
 
 def exception(request, exception):
-    print "Problem: {}: {}".format(request.url, exception)
+    print("Problem: {}: {}".format(request.url, exception))
 
 def google_pages_multithread(text, soup):
     pg_hits = [0,0,0]
@@ -216,7 +228,7 @@ def google_pages_multithread(text, soup):
             pg_hits[1] += float(page_upper.count(text['a2'].upper()))*(1./float(i+1))
             pg_hits[2] += float(page_upper.count(text['a3'].upper()))*(1./float(i+1))
 
-    print "PAGE HITS: " + str(pg_hits)
+    print("PAGE HITS: " + str(pg_hits))
     return pg_hits
 
 
@@ -234,7 +246,7 @@ def page_hits(text, results):
         except:
             pass
 
-    print "PAGE HITS: " + str(pg_hits)
+    print("PAGE HITS: " + str(pg_hits))
     return pg_hits
 
 def total_results(text):
@@ -252,8 +264,52 @@ def total_results(text):
     results2 = int(r2.json()['searchInformation']['totalResults'])
     results3 = int(r3.json()['searchInformation']['totalResults'])
 
-    print "TOTAL HITS: " + str([results1,results2,results3])
+    print ("TOTAL HITS: " + str([results1,results2,results3]))
     return [results1,results2,results3]
     
 
+def count_syn(string,word):
+    start = time.time()
+    syn = wordnet.synsets(word)
+    print "GET SYNSETS: "+str(time.time()-start)
+    print(syn)  
+    start = time.time()
+    for item in syn:
+        print(item.lemma_names())
+    print "GET LEMMA_NAMES: "+str(time.time()-start)
+    return
+
+#count_syn("","run")
+
 test = {'keywords': u'What U.S. town music venue allows Americans watch live, in-person concerts Canada? ', 'a1': u'Derby Line', 'a3': u'Niagara Falls', 'a2': u'Portal', 'question': u'What U.S. town has a music venue which allows Americans to watch live, in-person concerts from Canada? '}
+
+def preprocess_wordnet():
+    start = time.time()
+    thesaurus = {}
+    synsets = {}
+    for item in wordnet.all_synsets():
+        name = item._name
+        synsets[name] = set(item._lemma_names)
+        for word in synsets[name]:
+            try:
+                thesaurus[word].append(name)
+            except KeyError:
+                thesaurus[word] = [name]
+    print "TIME: " + str(time.time()-start)
+    start = time.time()
+    i = 0
+    for word in thesaurus:
+        if i < 5:
+            print word
+            for meaning in thesaurus[word]:
+                print meaning
+                print synsets[meaning]
+            print "************"
+        else:
+            break
+        i+=1
+    print "5 LOOKUPS: " + str(time.time()-start)
+    
+    return (thesaurus,synsets)
+
+preprocess_wordnet()
