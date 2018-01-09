@@ -284,52 +284,32 @@ def count_syn(string,word):
 
 test = {'keywords': u'What U.S. town music venue allows Americans watch live, in-person concerts Canada? ', 'a1': u'Derby Line', 'a3': u'Niagara Falls', 'a2': u'Portal', 'question': u'What U.S. town has a music venue which allows Americans to watch live, in-person concerts from Canada? '}
 
-# i = 0
-# tot = 0
-# for item in wordnet.all_synsets():
-#     tot += 1
-#     if i < 11:
-#         if i == 10:
-#             print dir(item)
-#             print "***********************"
-#             print item._lemma_names
-#             print ">>>>>>>>>>>>>>>>>>"
-#             print item.lemma_names
-#     else:
-#         break
-#     i += 1
-# # print len(wordnet.all_synsets())
-# print "------------------"
-# #print tot
-# #print dir(wordnet)
-# #print dir(wordnet.synsets("car")[0])
-
-# print wordnet.synsets('run')[0].lemma_names()
-
 def preprocess_wordnet():
     start = time.time()
     thesaurus = {}
-    synsets = []
+    synsets = {}
     for item in wordnet.all_synsets():
-        synsets.append(set(item._lemma_names))
-        for word in synsets[-1]:
+        name = item._name
+        synsets[name] = set(item._lemma_names)
+        for word in synsets[name]:
             try:
-                thesaurus[word].append(len(synsets)-1)
+                thesaurus[word].append(name)
             except KeyError:
-                thesaurus[word] = [len(synsets)-1]
-    # print "TIME: " + str(time.time()-start)
-    # start = time.time()
-    # i = 0
-    # for word in thesaurus:
-    #     if i < 5:
-    #         print word
-    #         for idx in thesaurus[word]:
-    #             print synsets[idx]
-    #         print "************"
-    #     else:
-    #         break
-    #     i+=1
-    # print "5 LOOKUPS: " + str(time.time()-start)
+                thesaurus[word] = [name]
+    print "TIME: " + str(time.time()-start)
+    start = time.time()
+    i = 0
+    for word in thesaurus:
+        if i < 5:
+            print word
+            for meaning in thesaurus[word]:
+                print meaning
+                print synsets[meaning]
+            print "************"
+        else:
+            break
+        i+=1
+    print "5 LOOKUPS: " + str(time.time()-start)
     
     return (thesaurus,synsets)
 
