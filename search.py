@@ -207,7 +207,7 @@ def google_pages_multithread(text, soup):
     
     start = time.time()
     results = grequests.map((grequests.get(u, timeout=(0.5, 0.5)) for u in urls), exception_handler=exception, size=len(urls))
-    print(urls)
+    print("Time to get multi-urls: " + str(time.time() - start))
 
     for u in results:
         if u != None:

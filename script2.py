@@ -15,13 +15,16 @@ def createDict(string):
     for i in range(len(content)-1, -1, -1):
         if re.match(r'^\s*$', content[i]):
             del content[i]
-    print(content)
 
     for i in range(len(content) - 3):
         result["question"] += content[i] + " "
 
-    result["question"] = result["question"].replace("'", " ")
-    result["question"] = result["question"].replace('"', " ")
+    result["question"] = result["question"].replace("'", "\'")
+    result["question"] = result["question"].replace('"', '\"')
+    # result["question"] = result["question"].replace('\u201c', '\"')
+    # result["question"] = result["question"].replace('\u201d', '\"')
+    # result["quesiton"] = result["question"].replace('\ufb02', 'fl')
+    # result["question"] = result["question"].replace('\u')
 
     result["keywords"] = ' '.join([word for word in result['question'].split(" ") if word not in stopwords])
     #result["keywords"] = result["question"]
@@ -36,4 +39,14 @@ def singleTest(filename):
     print(result)
     return process(result)
 
-print singleTest("questions/Set-6/Q4.png")
+def multipleTests(setNum, start, end):
+    for i in range(start, end + 1):
+        img = 'questions/Set-' + str(setNum) + '/Q' + str(i) + '.png'
+        res = detectText(img)
+        final = createDict(res)
+        answer = process(final)
+        print(final)
+        print(answer)
+
+# print singleTest("questions/Set-6/Q4.png")
+multipleTests(3, 1, 12)
