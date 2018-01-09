@@ -113,5 +113,5 @@ def multipleTests(setNum, start, end):
 
 
 #singleTest("question.png")
-multipleTests(2, 1, 12)
+multipleTests(1, 1, 12)
 
