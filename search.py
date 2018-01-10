@@ -226,8 +226,7 @@ def google_pages_multithread(text, soup):
     
     start = time.time()
     results = grequests.map((grequests.get(u, timeout=(0.5, 0.5)) for u in urls), exception_handler=exception, size=len(urls))
-    print("PAGE RESULTS: " + str(time.time()-start))
-    print(urls)
+    print("Time to get multi-urls: " + str(time.time() - start))
 
     for u in results:
         if u != None:
@@ -331,12 +330,12 @@ def search_text(text, phrase):
     return phrasehits
 
 def search_answer(text,answer):
-    keywords = ' '.join([word for word in answer.split(" ") if word not in stopwords])
+    keywords = [word for word in answer.split(" ") if word not in stopwords]
     keyweight = 1./float(len(keywords))
     ans_hits = search_text(text,answer)
     key_hits = 0
-    for word in keywords:
-        key_hits += search_text(text,word)
-    key_hits = float(key_hits)*keyweight
-    key_hits -= ans_hits
+    # for word in keywords:
+    #     key_hits += search_text(text,word)
+    # key_hits = float(key_hits)*keyweight
+    # key_hits -= ans_hits
     return ans_hits + key_hits
