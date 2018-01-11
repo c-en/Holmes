@@ -85,7 +85,6 @@ def createDict(text):
     result["a1"] = text[-4]
     result["a2"] = text[-3]
     result["a3"] = text[-2]
-    print(result)
     return result
 
 def singleTest(filename):
@@ -113,5 +112,5 @@ def multipleTests(setNum, start, end):
 
 
 #singleTest("question2.png")
-multipleTests(1, 1, 12)
+multipleTests(6, 1, 12)
 
