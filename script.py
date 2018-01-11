@@ -1,27 +1,30 @@
 # Main Script
+import time
+from search import process
+from ocr import detect_text
+import pyscreenshot as ImageGrab
 
-def singleTest(filename, ocr="google", search="multithread"):
-    start = time.time()
-    myVision = VisionApi()
-    text = myVision.detect_text([filename])[filename][0]["description"].split("\n")
-    result = createDict(text)
-    print(process(result))
+def single_test(filename, ocr="google", searchMethod="multithread"):
+    result = detect_text(filename, ocr)
+    print process(result, searchMethod)
 
-def multipleTests(setNum, start, end, ocr="google", search="multithread"):
-    texts = []
+def multiple_tests(setNum, start, end, ocr="google", searchMethod="multithread"):
     for i in range(start, end + 1):
-        texts.append("questions/Set-" + str(setNum) + "/Q" + str(i) + ".png")
-    myVision = VisionApi()
-    result = myVision.detect_text(texts)
-
-    for i in range(start, end + 1):
+        print "***********************************"
         start = time.time()
-        text = result["questions/Set-" + str(setNum) + "/Q" + str(i) + ".png"][0]["description"].split("\n")
-        final = createDict(text)
-        answer = process(final)
-        print("Total time for search: " + str(time.time() - start))
-        print(answer)
+        filename = 'questions/Set-' + str(setNum) + '/Q' + str(i) + '.png'
+        result = detect_text(filename, ocr)
+        print process(result, searchMethod)
+        print "Total time: " + str(time.time() - start)
 
-#singleTest("question2.png")
-multipleTests(1, 1, 12)
+def run_holmes():
+    print "Running Holmes...."
+    while True:
+        raw_input("Press enter when next question is ready. ")
+        im = ImageGrab.grab(bbox=(1314,140,1659,480))
+        im.save("question.png")
+        single_test("question.png", "pytesseract", "multithread")
 
+# single_test("questions/Set-6/Q3.png")
+# multiple_tests(6, 1, 4)
+run_holmes()
