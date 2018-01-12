@@ -132,5 +132,7 @@ lookup_roots('run',a[0],a[1])
 lookup_roots('ran',a[0],a[1])
 lookup_roots('running',a[0],a[1])
 print 'LOOKUP 4:' + str(time.time()-start)
+with open('thesaurus.txt','w') as f:
+    f.write(str(a))
 
 # preprocess_word_forms()
