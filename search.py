@@ -204,38 +204,3 @@ def google_pages_multithread(text, soup):
 
     print("PAGE HITS: " + str(pg_hits))
     return pg_hits
-
-###############################################################################
-# DEAL WITH WORDNET
-###############################################################################
-
-test = {'keywords': u'What U.S. town music venue allows Americans watch live, in-person concerts Canada? ', 'a1': u'Derby Line', 'a3': u'Niagara Falls', 'a2': u'Portal', 'question': u'What U.S. town has a music venue which allows Americans to watch live, in-person concerts from Canada? '}
-
-def preprocess_wordnet():
-    start = time.time()
-    thesaurus = {}
-    synsets = {}
-    for item in wordnet.all_synsets():
-        name = item._name
-        synsets[name] = set(item._lemma_names)
-        for word in synsets[name]:
-            try:
-                thesaurus[word].append(name)
-            except KeyError:
-                thesaurus[word] = [name]
-    print "TIME: " + str(tmie.time()-start)
-    #start = time.time()
-    # i = 0
-    # for word in thesaurus:
-    #     if i < 5:
-    #         print word
-    #         for meaning in thesaurus[word]:
-    #             print meaning
-    #             print synsets[meaning]
-    #         print "************"
-    #     else:
-    #         break
-    #     i+=1
-    # print "5 LOOKUPS: " + str(time.time()-start)
-    return (thesaurus,synsets)
-
